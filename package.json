@@ -1,0 +1,32 @@
+{
+  "name": "mobile-calculator",
+  "version": "1.0.0",
+  "description": "Mobile-first progressive web and hybrid calculator application",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "build:android": "bash scripts/build-android.sh",
+    "build:ios": "bash scripts/build-ios.sh"
+  },
+  "keywords": [
+    "calculator",
+    "mobile",
+    "pwa",
+    "typescript",
+    "haptics",
+    "android",
+    "ios"
+  ],
+  "author": "Engineering Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#121214" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Calculator" />
+  <meta name="description" content="High-performance mobile calculator with offline support and haptic feedback" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <link rel="stylesheet" href="./assets/theme.css" />
+  <title>Calculator Mobile PWA</title>
+</head>
+<body>
+  <div id="app-container" class="app-container dark-theme">
+    <header class="app-header">
+      <div class="header-left">
+        <button id="btn-history" class="icon-btn" aria-label="Calculation History" title="History">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="header-title">CALCULATOR</div>
+      <div class="header-right">
+        <button id="btn-theme-toggle" class="icon-btn" aria-label="Toggle Theme" title="Switch Theme">
+          <svg class="theme-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+        <button id="btn-haptic-toggle" class="icon-btn active" aria-label="Toggle Haptic Feedback" title="Haptics">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 8v8"></path>
+            <path d="M6 5v14"></path>
+            <rect x="10" y="3" width="4" height="18" rx="2"></rect>
+            <path d="M18 5v14"></path>
+            <path d="M22 8v8"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="calculator-main">
+      <section class="display-section" aria-live="polite">
+        <div id="display-expression" class="display-expression">&nbsp;</div>
+        <div id="display-current" class="display-current" role="status" aria-atomic="true">0</div>
+      </section>
+
+      <section class="keypad-section" aria-label="Calculator Keypad">
+        <div class="keypad-grid">
+          <button class="calc-btn btn-function" data-action="clear" data-key="Escape" aria-label="Clear">AC</button>
+          <button class="calc-btn btn-function" data-action="sign" data-key="±" aria-label="Toggle Sign">+/-</button>
+          <button class="calc-btn btn-function" data-action="percent" data-key="%" aria-label="Percent">%</button>
+          <button class="calc-btn btn-operator" data-action="divide" data-key="/" aria-label="Divide">&divide;</button>
+
+          <button class="calc-btn btn-digit" data-action="digit" data-value="7" data-key="7">7</button>
+          <button class="calc-btn btn-digit" data-action="digit" data-value="8" data-key="8">8</button>
+          <button class="calc-btn btn-digit" data-action="digit" data-value="9" data-key="9">9</button>
+          <button class="calc-btn btn-operator" data-action="multiply" data-key="*" aria-label="Multiply">&times;</button>
+
+          <button class="calc-btn btn-digit" data-action="digit" data-value="4" data-key="4">4</button>
+          <button class="calc-btn btn-digit" data-action="digit" data-value="5" data-key="5">5</button>
+          <button class="calc-btn btn-digit" data-action="digit" data-value="6" data-key="6">6</button>
+          <button class="calc-btn btn-operator" data-action="subtract" data-key="-" aria-label="Subtract">&minus;</button>
+
+          <button class="calc-btn btn-digit" data-action="digit" data-value="1" data-key="1">1</button>
+          <button class="calc-btn btn-digit" data-action="digit" data-value="2" data-key="2">2</button>
+          <button class="calc-btn btn-digit" data-action="digit" data-value="3" data-key="3">3</button>
+          <button class="calc-btn btn-operator" data-action="add" data-key="+" aria-label="Add">+</button>
+
+          <button class="calc-btn btn-digit btn-zero" data-action="digit" data-value="0" data-key="0">0</button>
+          <button class="calc-btn btn-digit" data-action="decimal" data-key="." aria-label="Decimal">.</button>
+          <button class="calc-btn btn-equals" data-action="equals" data-key="Enter" aria-label="Equals">=</button>
+        </div>
+      </section>
+    </main>
+
+    <aside id="history-drawer" class="history-drawer closed" aria-hidden="true">
+      <div class="history-header">
+        <h3>History</h3>
+        <div class="history-actions">
+          <button id="btn-clear-history" class="text-btn">Clear</button>
+          <button id="btn-close-history" class="icon-btn" aria-label="Close history">&times;</button>
+        </div>
+      </div>
+      <ul id="history-list" class="history-list" role="list">
+        <li class="history-empty">No calculations yet</li>
+      </ul>
+    </aside>
+    <div id="history-overlay" class="history-overlay hidden"></div>
+  </div>
+
+  <script type="module" src="./assets/calculator.js"></script>
+</body>
+</html>
