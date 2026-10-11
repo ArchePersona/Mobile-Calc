@@ -7,17 +7,18 @@ import {
   inputDecimal,
   setOperation,
   calculate,
-  clear
+  clear,
+  allClear
 } from '../../src/core/calculator';
 import type { CalculatorState, Operator } from '../../src/core/types';
 
 describe('Core Calculator Logic', () => {
   describe('INITIAL_STATE', () => {
     it('should have initial default values', () => {
-      expect(INITIAL_STATE.displayValue).toBe('0');
+      expect(INITIAL_STATE.display).toBe('0');
       expect(INITIAL_STATE.previousValue).toBeNull();
-      expect(INITIAL_STATE.operator).toBeNull();
-      expect(INITIAL_STATE.waitingForOperand).toBe(false);
+      expect(INITIAL_STATE.operation).toBeNull();
+      expect(INITIAL_STATE.overwrite).toBe(false);
       expect(INITIAL_STATE.error).toBeNull();
     });
   });
@@ -43,9 +44,8 @@ describe('Core Calculator Logic', () => {
       expect(executeOperation(7, 2, '/')).toBe(3.5);
     });
 
-    it('should handle division by zero appropriately', () => {
-      const result = executeOperation(10, 0, '/');
-      expect(Number.isFinite(result)).toBe(false);
+    it('should throw on division by zero', () => {
+      expect(() => executeOperation(10, 0, '/')).toThrow('Division by zero');
     });
   });
 
@@ -60,38 +60,38 @@ describe('Core Calculator Logic', () => {
       expect(result).toBe('0.3');
     });
 
-    it('should handle division by zero values or NaN gracefully', () => {
-      expect(formatResult(Infinity)).toMatch(/Error|Infinity/i);
-      expect(formatResult(NaN)).toMatch(/Error|NaN/i);
+    it('should handle non-finite values gracefully', () => {
+      expect(formatResult(Infinity)).toBe('Error');
+      expect(formatResult(NaN)).toBe('Error');
     });
   });
 
   describe('inputDigit', () => {
     it('should replace initial zero with entered digit', () => {
       const state = inputDigit(INITIAL_STATE, '7');
-      expect(state.displayValue).toBe('7');
-      expect(state.waitingForOperand).toBe(false);
+      expect(state.display).toBe('7');
+      expect(state.overwrite).toBe(false);
     });
 
     it('should append digits to existing number', () => {
       let state = inputDigit(INITIAL_STATE, '1');
       state = inputDigit(state, '2');
       state = inputDigit(state, '3');
-      expect(state.displayValue).toBe('123');
+      expect(state.display).toBe('123');
     });
 
-    it('should replace display when waitingForOperand is true', () => {
-      const waitingState: CalculatorState = {
+    it('should replace display when overwrite is true', () => {
+      const overwriteState: CalculatorState = {
         ...INITIAL_STATE,
-        displayValue: '50',
+        display: '50',
         previousValue: 50,
-        operator: '+',
-        waitingForOperand: true
+        operation: '+',
+        overwrite: true
       };
 
-      const state = inputDigit(waitingState, '9');
-      expect(state.displayValue).toBe('9');
-      expect(state.waitingForOperand).toBe(false);
+      const state = inputDigit(overwriteState, '9');
+      expect(state.display).toBe('9');
+      expect(state.overwrite).toBe(false);
     });
   });
 
@@ -99,7 +99,7 @@ describe('Core Calculator Logic', () => {
     it('should append decimal point to integer display', () => {
       const state = inputDigit(INITIAL_STATE, '5');
       const withDecimal = inputDecimal(state);
-      expect(withDecimal.displayValue).toBe('5.');
+      expect(withDecimal.display).toBe('5.');
     });
 
     it('should not allow multiple decimal points in display', () => {
@@ -107,20 +107,20 @@ describe('Core Calculator Logic', () => {
       state = inputDecimal(state);
       state = inputDigit(state, '2');
       state = inputDecimal(state);
-      expect(state.displayValue).toBe('5.2');
+      expect(state.display).toBe('5.2');
     });
 
-    it('should start with 0. when decimal is pressed while waiting for operand', () => {
-      const waitingState: CalculatorState = {
+    it('should start with 0. when decimal is pressed while overwrite is true', () => {
+      const overwriteState: CalculatorState = {
         ...INITIAL_STATE,
-        displayValue: '25',
+        display: '25',
         previousValue: 25,
-        operator: '-',
-        waitingForOperand: true
+        operation: '-',
+        overwrite: true
       };
-      const state = inputDecimal(waitingState);
-      expect(state.displayValue).toBe('0.');
-      expect(state.waitingForOperand).toBe(false);
+      const state = inputDecimal(overwriteState);
+      expect(state.display).toBe('0.');
+      expect(state.overwrite).toBe(false);
     });
   });
 
@@ -128,16 +128,16 @@ describe('Core Calculator Logic', () => {
     it('should set operator and store previous value', () => {
       let state = inputDigit(INITIAL_STATE, '8');
       state = setOperation(state, '+');
-      expect(state.operator).toBe('+');
+      expect(state.operation).toBe('+');
       expect(state.previousValue).toBe(8);
-      expect(state.waitingForOperand).toBe(true);
+      expect(state.overwrite).toBe(true);
     });
 
     it('should allow changing operator if next digit has not been entered', () => {
       let state = inputDigit(INITIAL_STATE, '8');
       state = setOperation(state, '+');
       state = setOperation(state, '*');
-      expect(state.operator).toBe('*');
+      expect(state.operation).toBe('*');
       expect(state.previousValue).toBe(8);
     });
 
@@ -146,10 +146,10 @@ describe('Core Calculator Logic', () => {
       state = setOperation(state, '+');
       state = inputDigit(state, '5');
       state = setOperation(state, '*');
-      expect(state.displayValue).toBe('15');
+      expect(state.display).toBe('15');
       expect(state.previousValue).toBe(15);
-      expect(state.operator).toBe('*');
-      expect(state.waitingForOperand).toBe(true);
+      expect(state.operation).toBe('*');
+      expect(state.overwrite).toBe(true);
     });
   });
 
@@ -159,31 +159,69 @@ describe('Core Calculator Logic', () => {
       state = setOperation(state, '-');
       state = inputDigit(state, '4');
       state = calculate(state);
-      expect(state.displayValue).toBe('6');
+      expect(state.display).toBe('6');
       expect(state.previousValue).toBeNull();
-      expect(state.operator).toBeNull();
-      expect(state.waitingForOperand).toBe(true);
+      expect(state.operation).toBeNull();
+      expect(state.overwrite).toBe(true);
     });
 
     it('should not change state if calculate is pressed without operator', () => {
       const state = inputDigit(INITIAL_STATE, '42');
       const result = calculate(state);
-      expect(result.displayValue).toBe('42');
-      expect(result.operator).toBeNull();
+      expect(result.display).toBe('42');
+      expect(result.operation).toBeNull();
+    });
+
+    it('should set an error state on division by zero', () => {
+      let state = inputDigit(INITIAL_STATE, '10');
+      state = setOperation(state, '/');
+      state = inputDigit(state, '0');
+      state = calculate(state);
+      expect(state.display).toBe('Error');
+      expect(state.error).toBe('Division by zero');
+    });
+
+    it('should record the calculation in history', () => {
+      let state = inputDigit(INITIAL_STATE, '10');
+      state = setOperation(state, '-');
+      state = inputDigit(state, '4');
+      state = calculate(state);
+      expect(state.history).toHaveLength(1);
+      expect(state.history[0].expression).toBe('10 - 4');
+      expect(state.history[0].result).toBe('6');
     });
   });
 
-  describe('clear', () => {
-    it('should reset state to INITIAL_STATE', () => {
+  describe('clear and allClear', () => {
+    it('clear should reset the current entry only', () => {
       let state = inputDigit(INITIAL_STATE, '9');
       state = setOperation(state, '+');
       state = inputDigit(state, '3');
-      const cleared = clear();
-      expect(cleared.displayValue).toBe('0');
+      const cleared = clear(state);
+      expect(cleared.display).toBe('0');
+      expect(cleared.overwrite).toBe(false);
+      expect(cleared.error).toBeNull();
+      // Pending operation is preserved (clear-entry semantics).
+      expect(cleared.previousValue).toBe(9);
+      expect(cleared.operation).toBe('+');
+    });
+
+    it('allClear should reset state to initial values', () => {
+      let state = inputDigit(INITIAL_STATE, '9');
+      state = setOperation(state, '+');
+      state = inputDigit(state, '3');
+      const cleared = allClear();
+      expect(cleared.display).toBe('0');
       expect(cleared.previousValue).toBeNull();
-      expect(cleared.operator).toBeNull();
-      expect(cleared.waitingForOperand).toBe(false);
+      expect(cleared.operation).toBeNull();
+      expect(cleared.overwrite).toBe(false);
       expect(cleared.error).toBeNull();
     });
+  });
+
+  // Keep the Operator import referenced for future operator-parametrized tests.
+  it('exposes the operator type', () => {
+    const op: Operator = '*';
+    expect(executeOperation(6, 7, op)).toBe(42);
   });
 });

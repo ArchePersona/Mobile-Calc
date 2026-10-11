@@ -139,9 +139,12 @@ npm run build:ios
 │   ├── assets/                 # Compiled JavaScript and CSS bundles
 │   │   ├── calculator.js
 │   │   └── theme.css
-│   ├── index.html              # Main HTML entry point
+│   ├── index.html              # Built HTML entry point
 │   ├── manifest.json           # PWA Web App Manifest
 │   └── sw.js                   # Service Worker for offline asset caching
+├── public/                     # Static files copied verbatim into dist/
+│   ├── manifest.json
+│   └── sw.js
 ├── scripts/                    # Automation and packaging scripts
 │   ├── build-android.sh        # Android APK packaging workflow
 │   └── build-ios.sh            # iOS IPA packaging workflow
@@ -149,15 +152,20 @@ npm run build:ios
 │   ├── core/                   # Core business logic and pure calculation engine
 │   │   ├── calculator.ts       # Mathematical operations and state transitions
 │   │   └── types.ts            # Type definitions and interfaces
-│   └── ui/                     # Presentation, interaction, and styling logic
-│       ├── haptics.ts          # Touch haptics and vibration triggers
-│       └── theme.ts            # Theme management (Dark/Light/System)
+│   ├── ui/                     # Presentation, interaction, and styling logic
+│   │   ├── haptics.ts          # Touch haptics and vibration triggers
+│   │   └── theme.ts            # Theme management (Dark/Light/System)
+│   ├── main.ts                 # App entry: wires the engine to the DOM
+│   └── theme.css               # Application styles
 ├── tests/                      # Automated test suites
 │   ├── core/
 │   │   └── calculator.test.ts  # Core calculation engine unit tests
 │   └── ui/
 │       ├── haptics.test.ts     # Haptic feedback unit tests
 │       └── theme.test.ts       # Theme manager unit tests
+├── index.html                  # Source HTML entry point
+├── vite.config.ts              # Vite build configuration
+├── vitest.config.ts            # Vitest configuration (jsdom environment)
 ├── package.json                # Project dependencies and script declarations
 ├── tsconfig.json               # TypeScript compiler configuration
 └── README.md                   # Project documentation and roadmap

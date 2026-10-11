@@ -11,8 +11,9 @@
   <link rel="manifest" href="./manifest.json" />
   <link rel="icon" type="image/png" href="./assets/icon-192.png" />
   <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-  <link rel="stylesheet" href="./assets/theme.css" />
   <title>Calculator Mobile PWA</title>
+  <script type="module" crossorigin src="./assets/calculator.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/theme.css">
 </head>
 <body>
   <div id="app-container" class="app-container dark-theme">
@@ -102,6 +103,5 @@
     <div id="history-overlay" class="history-overlay hidden"></div>
   </div>
 
-  <script type="module" src="./assets/calculator.js"></script>
 </body>
 </html>
